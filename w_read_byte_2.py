@@ -41,17 +41,16 @@ def badge_cards():
        run valid_card().
     """
     with open('cards.txt', 'rb') as file:
-        while True:
-            for line in file:
-                buf = line
-                
-                if buf == 0:
-                    break
-                   
-                send_card(buf)
-                utime.sleep(2)
-                valid_card()
-                utime.sleep(8)
+        for line in file:
+            buf = line
+
+            if buf == 0:
+                break
+
+            send_card(buf)
+            utime.sleep(2)
+            valid_card()
+            utime.sleep(8)
 
 def open_door():
     """Activates a Relay to break door contact"""
