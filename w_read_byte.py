@@ -5,6 +5,7 @@
 
 from machine import Pin
 import utime
+import errno
 
 
 dz = Pin(14, Pin.OUT, Pin.PULL_UP)
@@ -17,8 +18,8 @@ BUFFER_SIZE = 32
 buf = bytearray(BUFFER_SIZE)
 
 def send_card(card):
-    """Send card byte by using pin outputs"""
-    # print_card(card)
+    """Send card byte by using pin outputs to interface."""
+
     print(card)
     
     card_read.on()
@@ -37,7 +38,7 @@ def send_card(card):
     print("card sent")
         
 def badge_cards():
-    """Read string card number, pass buff to send_card(),
+    """Read card number into bytearray buf, pass buf to send_card(),
        run valid_card().
     """
     with open('cards.txt', 'rb') as file:
@@ -53,14 +54,16 @@ def badge_cards():
             utime.sleep(8)
 
 def open_door():
-    """Activates a Relay to break door contact"""
+    """Activates a Relay to simulate door contact"""
     door_pin.value(1)
     # print('door open')
     utime.sleep(5)
     door_pin.value(0)
 
 def valid_card():
-    """Reads the valid_read pin value, activates open_door()"""
+    """checks the valid_read pin value, activates open_door()
+       if card was valid/strike fired.
+    """
     # print(valid_read.value())
     if valid_read.value() == 0:
         print('valid card')
@@ -69,9 +72,19 @@ def valid_card():
         print("invalid")
 
 def main():
+    err_message = ("Error: \"cards.txt\" not found"
+                   " or card file is named incorrectly.")
+
     while True:
-        badge_cards()
-        utime.sleep(30)
+        try:
+            badge_cards()
+            utime.sleep(30)
+        except OSError as err:
+            if err.args[0] == errno.ENOENT:
+                print(err_message)
+                break;
+            else:
+                print(err)
 
 
 if __name__ == '__main__':
